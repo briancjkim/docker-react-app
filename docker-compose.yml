@@ -1,0 +1,30 @@
+# docker-compose.yml파일의 목적은 
+# docker command가 너무 길고 장황하기떄문에 컴포즈파일안에 다 기록해놓고 docker-compose up만하면되서
+
+version: "3"
+services:
+  react:
+    build:
+      # docker 이미지를 구성하기위한 파일폴더 위치
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: 
+      - "3000:3000"
+    volumes:
+      # 컨테이너에서 node_modules은 로컬을 참조하지않겟다
+      - /usr/src/app/node_modules 
+      - ./:/usr/src/app
+    # react 한정 옵션
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes: 
+      - /usr/src/app/node_modules
+      - ./:/usr/src/app
+    command: ["npm", "run", "test"]
+    environment:
+      - CHOKIDAR_USEPOLLING=true

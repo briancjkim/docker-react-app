@@ -1,70 +1,34 @@
-# Getting Started with Create React App
+docker file 개발환경, 운영환경을 위한 파일을 따로 만드는게 편하다
+Dockerfile.dev
+Dockerfile 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+Dockerfile.dev 만으로 이미지 docker build ./ 빌드실행시 'unable to evaluate symlink...'에러가보인다
+dockerfile이 없고 dockerfile.dev만 있기 떄문이다.
+이렇게 하면된다.
+-f: 어떠한 dockerfile을 참조할지 명시할떄 쓰는 테그
+docker build -f Dockerfile.dev ./
 
-In the project directory, you can run:
+docker환경에서 개발할떄는 local에 있는 nodemodule 지워줘도된다.
+이미 컨테이너안에서 npm install해서 node_module이 이미 존재하고
+그이후에 실행되는 COPY ./ ./ 에서 node_modules 복사하려고 한다 근데 이것은 쓸데없는짓이다.
 
-### `yarn start`
+-i: 상호입출력
+-t: tty를 활성화하여 bash쉘을 사용
+react 는 3000포트에서 실행되기떄문에 -p태그로 포트지정도 해줘야한다.
+docker run -p 3000:3000 brian/docker-react
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+***** react hot loading 을 사용하기위해서는 *****
+추가적으로 -e CHOKIDAR_USEPOLLING=true를 넣어주거나
+env 설정으로 넣어주던가 해야한다 (mac은 자체적으로 usePolling이 true이고 리눅스는 네트워크를통한 바인드가 아니어서 polling을 안해도 정상적인 watch가 가능하다)
+https://www.inflearn.com/questions/65535 참조
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+docker run -it -p 3000:3000 -v /usr/src/app/node_modules -v ${pwd}:/usr/src/app -e CHOKIDAR_USEPOLLING=true brian/docker-react
 
-### `yarn test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Docker 를 이용한 리액트 앱에서 테스트를 진행하려면
+이미지생성 docker build -f dockerfile.dev ./
+앱 실행 docker run -it(더좋은 포맷으로 결과값을 보기위한옵션) 이미지이름 npm run test
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+docker-compose up --build
+                   Build images before starting containers.
